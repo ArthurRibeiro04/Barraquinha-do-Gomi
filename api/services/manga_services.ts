@@ -12,6 +12,7 @@ export interface CreateMangaDTO {
   type: string;
   rating?: number;
   review: string;
+  image?: string;   
   user_id: string;
 }
 
@@ -22,18 +23,19 @@ export interface UpdateMangaDTO {
   type?: string;
   rating?: number;
   review?: string;
+  image?: string;  
 }
 
-export async function createMangaService(data: CreateMangaDTO) {
-  const { name, volume, release_date, type, review, rating, user_id } = data;
-
-  if (!name || !volume || !release_date || !type || !review || !user_id) {
-    throw {
-      statusCode: 400,
-      message: "name, volume, release_date, type, review e user_id são obrigatórios",
-    };
-  }
-
+export async function createMangaService({
+  name,
+  volume,
+  release_date,
+  type,
+  rating,
+  review,
+  image,
+  user_id,
+}: CreateMangaDTO) {
   const user = await userRepository.findOne({ where: { id: user_id } });
 
   if (!user) {
@@ -45,8 +47,9 @@ export async function createMangaService(data: CreateMangaDTO) {
     volume,
     release_date,
     type,
+    rating,
     review,
-    rating: rating ?? 0,
+    image, 
     user,
   });
 
@@ -55,28 +58,19 @@ export async function createMangaService(data: CreateMangaDTO) {
   return manga;
 }
 
-export async function listMangasService(type?: string) {
-  if (type) {
-    return mangaRepository.find({
-      where: { type },
-      order: { created_at: "DESC" },
-    });
+export async function listMangasService(type: string | undefined) {
+
+  if (!type) {
+    const mangas = await mangaRepository.find();
+     return mangas;
   }
 
-  return mangaRepository.find({
-    order: { created_at: "DESC" },
-  });
+  const mangas = await mangaRepository.findBy({ type })
+  return mangas
 }
 
 export async function getMangaByIdService(id: string) {
-  if (!id) {
-    throw { statusCode: 400, message: "id é obrigatório" };
-  }
-
-  const manga = await mangaRepository.findOne({
-    where: { id },
-    relations: ["comments"],
-  });
+  const manga = await mangaRepository.findOne({ where: { id } });
 
   if (!manga) {
     throw { statusCode: 404, message: "Mangá não encontrado" };
@@ -92,7 +86,13 @@ export async function updateMangaService(id: string, data: UpdateMangaDTO) {
     throw { statusCode: 404, message: "Mangá não encontrado" };
   }
 
-  Object.assign(manga, data);
+  if (data.name !== undefined) manga.name = data.name;
+  if (data.volume !== undefined) manga.volume = data.volume;
+  if (data.release_date !== undefined) manga.release_date = data.release_date;
+  if (data.type !== undefined) manga.type = data.type;
+  if (data.rating !== undefined) manga.rating = data.rating;
+  if (data.review !== undefined) manga.review = data.review;
+  if (data.image !== undefined) manga.image = data.image; // 👉 aqui também
 
   await mangaRepository.save(manga);
 

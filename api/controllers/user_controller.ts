@@ -3,7 +3,9 @@ import {
   createUserService,
   loginUserService,
   listUsersService,
+  getUserByIdService
 } from "../services/user_services";
+import { AuthRequest } from "../middlewares/auth.middleware";
 
 export async function registerUserController(req: Request, res: Response) {
   try {
@@ -38,5 +40,24 @@ export async function listUsersController(req: Request, res: Response) {
     return res.json(users);
   } catch (err: any) {
     return res.status(500).json({ error: "Erro ao listar usuários" });
+  }
+}
+
+export async function getMeController(req: AuthRequest, res: Response) {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(400).json({ error: "Usuário não encontrado no token" });
+    }
+
+    const user = await getUserByIdService(userId);
+
+    return res.json(user);
+  } catch (err: any) {
+    const status = err.statusCode || 500;
+    return res.status(status).json({
+      error: err.message || "Erro ao buscar usuário",
+    });
   }
 }

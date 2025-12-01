@@ -109,3 +109,16 @@ export async function listUsersService() {
 
   return users.map(toSafeUser);
 }
+
+export async function getUserByIdService(id: string | number) {
+  const user = await userRepository.findOne({
+    where: { id: String(id) },
+  });
+
+  if (!user) {
+    throw { statusCode: 404, message: "Usuário não encontrado" };
+  }
+
+  return toSafeUser(user);
+}
+

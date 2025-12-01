@@ -6,6 +6,7 @@ import {
   ReactNode,
 } from "react";
 
+
 interface User {
   id: string;
   name: string;
@@ -13,7 +14,6 @@ interface User {
 }
 
 interface AuthContextData {
-  user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
@@ -23,7 +23,6 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,13 +31,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (storedToken && storedUser) {
       setToken(storedToken);
-      setUser(JSON.parse(storedUser));
     }
   }, []);
 
   async function login(email: string, password: string) {
     try {
-      const response = await fetch("http://localhost:3333/api/auth/login", {
+      const response = await fetch("http://localhost:3333/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,11 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json();
-      const { user, token } = data;
+      const { token } = data;
 
-      setUser(user);
       setToken(token);
-      localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
     } catch (err: any) {
       console.error("Erro ao fazer login", err);
@@ -85,14 +81,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout() {
-    setUser(null);
     setToken(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+    <AuthContext.Provider value={{ token, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -21,17 +21,20 @@ export class Manga {
   @Column("int")
   volume: number;
 
-  @Column({ type: "date" })
+  @Column("text")
   release_date: string;
 
   @Column("text")
   type: string;
 
-  @Column("int", { default: 0 })
-  rating: number; // 0-10
+  @Column("float", { nullable: true })
+  rating?: number;
 
   @Column("text")
   review: string;
+
+  @Column("text", { nullable: true })
+  image?: string;
 
   @Column("int", { default: 0 })
   likes: number;

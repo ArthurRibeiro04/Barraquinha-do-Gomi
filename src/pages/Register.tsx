@@ -1,7 +1,19 @@
-export default function RegisterPage() {
+import { Navigate, useNavigate } from "react-router-dom";
+import RegisterForm from "../components/registerForm";
+import { FormContainer, Title } from "../components/StyledComponents";
+
+export default function Register() {
+  
+  const navigate = useNavigate()
+
+  const handleRegisterSuccess = () => {
+      navigate("/");
+  };
+
   return (
-    <div>
-      <h1>Register Page</h1>
-    </div>
+    <FormContainer>
+      <Title>Registre-se</Title>
+      <RegisterForm onSuccess={handleRegisterSuccess} />
+    </FormContainer>
   );
 }
